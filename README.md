@@ -2,7 +2,7 @@
 
 A simple, responsive calculator built with HTML, CSS, and JavaScript.
 
-![Calculator Screenshot](https://i.imgur.com/example.png) *(replace with actual screenshot)*
+![Live Demo]https://yarraguntababu117.github.io/calculator/
 
 ## Features
 
