@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .calculator {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .calculator:hover {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        }
+        .btn {
+            transition: all 0.2s ease;
+            transform: translateY(0);
+        }
+        .btn:active {
+            transform: translateY(2px);
+        }
+        .btn-operator {
+            background-color: #f59e0b;
+        }
+        .btn-operator:hover {
+            background-color: #d97706;
+        }
+        .btn-equals {
+            background-color: #10b981;
+        }
+        .btn-equals:hover {
+            background-color: #059669;
+        }
+        .btn-clear {
+            background-color: #ef4444;
+        }
+        .btn-clear:hover {
+            background-color: #dc2626;
+        }
+        .display {
+            min-height: 80px;
+            word-wrap: break-word;
+            word-break: break-all;
+        }
+        @media (max-width: 640px) {
+            .calculator {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 min-h-screen flex items-center justify-center p-4">
+    <div class="calculator bg-gray-800 rounded-2xl p-6 w-full max-w-md">
+        <div class="display bg-gray-700 text-white text-right p-4 rounded-xl mb-4 text-3xl font-semibold shadow-inner" id="display">0</div>
+        
+        <div class="grid grid-cols-4 gap-3">
+            <!-- Row 1 -->
+            <button class="btn-clear btn bg-red-500 text-white p-4 rounded-xl text-xl font-bold col-span-2" onclick="clearDisplay()">AC</button>
+            <button class="btn-operator btn bg-amber-500 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('/')">÷</button>
+            <button class="btn-operator btn bg-amber-500 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('*')">×</button>
+            
+            <!-- Row 2 -->
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('7')">7</button>
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('8')">8</button>
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('9')">9</button>
+            <button class="btn-operator btn bg-amber-500 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('-')">-</button>
+            
+            <!-- Row 3 -->
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('4')">4</button>
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('5')">5</button>
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('6')">6</button>
+            <button class="btn-operator btn bg-amber-500 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('+')">+</button>
+            
+            <!-- Row 4 -->
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('1')">1</button>
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('2')">2</button>
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('3')">3</button>
+            <button class="btn-equals btn bg-emerald-500 text-white p-4 rounded-xl text-xl font-bold row-span-2" onclick="calculate()">=</button>
+            
+            <!-- Row 5 -->
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold col-span-2" onclick="appendToDisplay('0')">0</button>
+            <button class="btn bg-gray-600 text-white p-4 rounded-xl text-xl font-bold" onclick="appendToDisplay('.')">.</button>
+        </div>
+        
+        <div class="mt-4 text-gray-400 text-sm flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-keyboard mr-2"></i>
+                <span>Keyboard supported</span>
+            </div>
+            <div class="text-right">
+                <span id="last-calculation" class="italic"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentInput = '0';
+        let previousInput = '';
+        let operation = null;
+        let resetScreen = false;
+        const display = document.getElementById('display');
+        const lastCalculation = document.getElementById('last-calculation');
+
+        // Update display
+        function updateDisplay(value) {
+            display.textContent = value;
+        }
+
+        // Append to display
+        function appendToDisplay(value) {
+            if (currentInput === '0' || resetScreen) {
+                currentInput = '';
+                resetScreen = false;
+            }
+            
+            // Prevent multiple decimals
+            if (value === '.' && currentInput.includes('.')) return;
+            
+            currentInput += value;
+            updateDisplay(currentInput);
+        }
+
+        // Clear display
+        function clearDisplay() {
+            currentInput = '0';
+            previousInput = '';
+            operation = null;
+            updateDisplay(currentInput);
+            lastCalculation.textContent = '';
+        }
+
+        // Handle operations
+        function handleOperation(op) {
+            if (operation !== null) calculate();
+            previousInput = currentInput;
+            operation = op;
+            resetScreen = true;
+            lastCalculation.textContent = `${previousInput} ${operation}`;
+        }
+
+        // Calculate result
+        function calculate() {
+            if (operation === null || resetScreen) return;
+            
+            let result;
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+            
+            if (isNaN(prev) || isNaN(current)) return;
+            
+            switch (operation) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    result = prev / current;
+                    break;
+                default:
+                    return;
+            }
+            
+            currentInput = result.toString();
+            operation = null;
+            resetScreen = true;
+            updateDisplay(currentInput);
+            lastCalculation.textContent = `${previousInput} ${operation || ''} ${currentInput}`;
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendToDisplay(e.key);
+            else if (e.key === '.') appendToDisplay('.');
+            else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') {
+                handleOperation(e.key);
+            }
+            else if (e.key === 'Enter' || e.key === '=') {
+                e.preventDefault();
+                calculate();
+            }
+            else if (e.key === 'Escape') clearDisplay();
+            else if (e.key === 'Backspace') {
+                currentInput = currentInput.slice(0, -1);
+                if (currentInput === '') currentInput = '0';
+                updateDisplay(currentInput);
+            }
+        });
+
+        // Initialize display
+        updateDisplay(currentInput);
+    </script>
+</body>
+</html>
